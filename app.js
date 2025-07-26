@@ -17,15 +17,14 @@ const rateLimiter = require("express-rate-limit");
 const notFoundMiddleware = require("./middleware/not-found");
 const errorHandlerMiddleware = require("./middleware/error-handler");
 
+const limiter = rateLimiter({
+  windowMs: 15 * 60 * 1000, //15 Minute
+  max: 100, //100 requests per WindowMs
+});
 app.use(express.json());
 // extra packages
 app.set("trust proxy", 1);
-app.use(
-  rateLimiter({
-    windowMs: 15 * 60 * 1000, //15 Minute
-    max: 100, //100 requests per WindowMs
-  })
-);
+app.use(limiter);
 app.use(helmet());
 app.use(cors());
 app.use(xss());
