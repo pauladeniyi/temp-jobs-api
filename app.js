@@ -11,7 +11,7 @@ const authMiddleware = require("./middleware/authentication");
 // extra security package
 const helmet = require("helmet");
 const cors = require("cors");
-const xss = require("xss");
+const xss = require("xss-clean");
 const rateLimiter = require("express-rate-limit");
 // error handler
 const notFoundMiddleware = require("./middleware/not-found");
