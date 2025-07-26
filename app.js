@@ -26,7 +26,7 @@ app.use(
     max: 100, //100 requests per WindowMs
   })
 );
-ap.use(helmet());
+app.use(helmet());
 app.use(cors());
 app.use(xss());
 
