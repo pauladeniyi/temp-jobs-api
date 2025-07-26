@@ -40,12 +40,14 @@ const port = process.env.PORT || 3000;
 
 const start = async () => {
   try {
-    app.listen(port, () => {
-      connectDB(process.env.MONGO_URI);
-      console.log(`Server is listening on port ${port}...`);
-    });
+    await connectDB(process.env.MONGO_URI); // ✅ Ensure DB is connected
+    console.log("Connected to MongoDB");
+    app.listen(port, () =>
+      console.log(`Server is listening on port ${port}...`)
+    );
   } catch (error) {
-    console.log(error);
+    console.error("Failed to connect to MongoDB", error);
+    process.exit(1); // exit if DB fails
   }
 };
 
