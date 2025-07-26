@@ -1,0 +1,74 @@
+const { BadRequestError } = require("../errors/bad-request");
+const { NotFoundError } = require("../errors/not-found");
+const { StatusCodes } = require("http-status-codes");
+const Job = require("../models/Job");
+const User = require("../models/User");
+
+const createJob = async (req, res) => {
+  req.body.createdBy = req.user.userId;
+  try {
+    const job = await Job.create(req.body);
+    res.status(StatusCodes.CREATED).json({ job });
+  } catch (error) {
+    throw new BadRequestError("Invalid credentials");
+  }
+};
+
+const getAllJobs = async (req, res) => {
+  console.log(req.user);
+  const jobs = await Job.find({ createdBy: req.user.userId }).sort("createdAt");
+  res.status(StatusCodes.OK).json({ jobs, count: jobs.length });
+};
+
+const getJob = async (req, res) => {
+  const {
+    user: { userId },
+    params: { id: jobId },
+  } = req;
+
+  const job = await Job.findOne({
+    _id: jobId,
+    createdBy: userId,
+  });
+  if (!job) {
+    throw new NotFoundError(`No job with id ${jobId}`);
+  }
+  res.status(StatusCodes.OK).json({ job });
+};
+
+const updateJob = async (req, res) => {
+  const {
+    body: { company, position },
+    user: { userId },
+    params: { id: jobId },
+  } = req;
+  if (company === " " || position === " ") {
+    throw new BadRequestError(
+      "The company and the position must cannot be null"
+    );
+  }
+  const job = await Job.findByIdAndUpdate(
+    { _id: jobId, createdBy: userId },
+    req.body,
+    { new: true, runValidators: true }
+  );
+  if (!job) {
+    throw new NotFoundError(`No job with id ${jobId}`);
+  }
+  res.status(StatusCodes.OK).json({ job });
+};
+
+const deleteJob = async (req, res) => {
+  const {
+    user: { userId },
+    params: { id: jobId },
+  } = req;
+
+  const job = await Job.findByIdAndDelete({ _id: jobId, createdBy: userId });
+  if (!job) {
+    throw new NotFoundError(`No job with id ${jobId}`);
+  }
+  res.status(StatusCodes.OK).send();
+};
+
+module.exports = { createJob, getAllJobs, getJob, updateJob, deleteJob };
